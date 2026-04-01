@@ -148,33 +148,41 @@ cards.forEach((cardWrap) => {
   setMenuState(false);
 })();
 
-/* Home hero entrance animation (desktop only) */
+/* Home hero entrance animation (desktop only) – DEFERRED for performance */
 document.addEventListener("DOMContentLoaded", function () {
-  var body = document.body;
-  if (!body || !body.classList.contains("home-page")) return;
-  if (window.matchMedia("(max-width: 991px)").matches) return;
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  if (typeof window.gsap === "undefined") return;
+  var triggerAnimation = function() {
+    var body = document.body;
+    if (!body || !body.classList.contains("home-page")) return;
+    if (window.matchMedia("(max-width: 991px)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (typeof window.gsap === "undefined") return;
 
-  var heroLogo = document.querySelector(".home-page header .hero-logo");
-  var heroArrow = document.querySelector(".home-page header .lrg-img-pointer");
-  if (!heroLogo || !heroArrow) return;
+    var heroLogo = document.querySelector(".home-page header .hero-logo");
+    var heroArrow = document.querySelector(".home-page header .lrg-img-pointer");
+    if (!heroLogo || !heroArrow) return;
 
-  gsap.set(heroLogo, { x: -180, autoAlpha: 0 });
-  gsap.set(heroArrow, { autoAlpha: 0, scale: 0.68, transformOrigin: "50% 50%" });
+    gsap.set(heroLogo, { x: -180, autoAlpha: 0 });
+    gsap.set(heroArrow, { autoAlpha: 0, scale: 0.68, transformOrigin: "50% 50%" });
 
-  var timeline = gsap.timeline({ defaults: { ease: "power3.out" } });
-  timeline.to(heroLogo, {
-    x: 0,
-    autoAlpha: 1,
-    duration: 0.9,
-  });
-  timeline.to(heroArrow, {
-    autoAlpha: 1,
-    scale: 1,
-    duration: 0.38,
-    ease: "back.out(1.8)",
-  }, "-=0.02");
+    var timeline = gsap.timeline({ defaults: { ease: "power3.out" } });
+    timeline.to(heroLogo, {
+      x: 0,
+      autoAlpha: 1,
+      duration: 0.9,
+    });
+    timeline.to(heroArrow, {
+      autoAlpha: 1,
+      scale: 1,
+      duration: 0.38,
+      ease: "back.out(1.8)",
+    }, "-=0.02");
+  };
+  /* Defer animation until browser is idle to prevent blocking initial render */
+  if ("requestIdleCallback" in window) {
+    requestIdleCallback(triggerAnimation, { timeout: 2000 });
+  } else {
+    setTimeout(triggerAnimation, 250);
+  }
 });
 
 /* Home CTA reveal on scroll */
@@ -241,108 +249,159 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 })();
 
-/* Testimonials slider */
+/* Testimonials slider – LAZY INITIALIZED when visible */
 document.addEventListener("DOMContentLoaded", function () {
   var sliderRoot = document.querySelector(".testimonials-slider-wrapper");
   if (!sliderRoot || typeof Swiper === "undefined") {
     return;
   }
 
-  var liveRegion = document.getElementById("swiper-wrapper-f3fbcbe7e663d6f1");
-  var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var swiperInitialized = false;
 
-  /* Suppress live-region announcements while autoplay is running */
-  if (!reducedMotion && liveRegion) {
-    liveRegion.setAttribute("aria-live", "off");
+  /* Only initialize Swiper when carousel comes into view */
+  if (!("IntersectionObserver" in window)) {
+    /* Fallback: initialize immediately if IntersectionObserver not supported */
+    initSwiper();
+    return;
   }
 
-  var swiper = new Swiper(".testimonials-slider-wrapper", {
-    navigation: {
-      nextEl: ".testimonials-next",
-      prevEl: ".testimonials-prev"
-    },
-    pagination: {
-      el: ".testimonials-pagination",
-      clickable: true,
-      renderBullet: function (index, className) {
-        return '<button class="' + className + '" type="button" aria-label="Go to testimonial ' + (index + 1) + '"></button>';
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting && !swiperInitialized) {
+        swiperInitialized = true;
+        initSwiper();
+        observer.disconnect();
       }
-    },
-    keyboard: {
-      enabled: true,
-      onlyInViewport: true,
-      pageUpDown: false
-    },
-    effect: "cards",
-    grabCursor: true,
-    autoplay: reducedMotion
-      ? false
-      : { delay: 5000, disableOnInteraction: true },
-    a11y: {
-      enabled: true,
-      prevSlideMessage: "Previous slide",
-      nextSlideMessage: "Next slide",
-      firstSlideMessage: "First slide",
-      lastSlideMessage: "Last slide"
+    });
+  }, { threshold: 0.05, rootMargin: "50px" });
+
+  observer.observe(sliderRoot);
+
+  function initSwiper() {
+    var liveRegion = document.getElementById("swiper-wrapper-f3fbcbe7e663d6f1");
+    var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    /* Suppress live-region announcements while autoplay is running */
+    if (!reducedMotion && liveRegion) {
+      liveRegion.setAttribute("aria-live", "off");
     }
-  });
 
-  /* Once the user interacts and autoplay stops, restore polite live announcements */
-  swiper.on("autoplayStop", function () {
-    if (liveRegion) liveRegion.setAttribute("aria-live", "polite");
-  });
+    var swiper = new Swiper(".testimonials-slider-wrapper", {
+      navigation: {
+        nextEl: ".testimonials-next",
+        prevEl: ".testimonials-prev"
+      },
+      pagination: {
+        el: ".testimonials-pagination",
+        clickable: true,
+        renderBullet: function (index, className) {
+          return '<button class="' + className + '" type="button" aria-label="Go to testimonial ' + (index + 1) + '"></button>';
+        }
+      },
+      keyboard: {
+        enabled: true,
+        onlyInViewport: true,
+        pageUpDown: false
+      },
+      effect: "cards",
+      grabCursor: true,
+      autoplay: reducedMotion
+        ? false
+        : { delay: 5000, disableOnInteraction: true },
+      a11y: {
+        enabled: true,
+        prevSlideMessage: "Previous slide",
+        nextSlideMessage: "Next slide",
+        firstSlideMessage: "First slide",
+        lastSlideMessage: "Last slide"
+      }
+    });
 
-  /* Foremost card tilt (active slide only) */
-  if (!reducedMotion) {
-    var tiltStrength = 7;
+    /* Once the user interacts and autoplay stops, restore polite live announcements */
+    swiper.on("autoplayStop", function () {
+      if (liveRegion) liveRegion.setAttribute("aria-live", "polite");
+    });
 
-    function resetTiltAll() {
-      sliderRoot.querySelectorAll(".el-temoignages-item").forEach(function (card) {
-        card.style.transform = "rotateX(0deg) rotateY(0deg)";
+    /* Foremost card tilt (active slide only) */
+    if (!reducedMotion) {
+      var tiltStrength = 7;
+
+      function resetTiltAll() {
+        sliderRoot.querySelectorAll(".el-temoignages-item").forEach(function (card) {
+          card.style.transform = "rotateX(0deg) rotateY(0deg)";
+        });
+      }
+
+      function getActiveCard() {
+        return sliderRoot.querySelector(".swiper-slide-active .el-temoignages-item");
+      }
+
+      sliderRoot.addEventListener("mousemove", function (e) {
+        var activeCard = getActiveCard();
+        if (!activeCard) return;
+
+        var rect = activeCard.getBoundingClientRect();
+        if (
+          e.clientX < rect.left ||
+          e.clientX > rect.right ||
+          e.clientY < rect.top ||
+          e.clientY > rect.bottom
+        ) {
+          activeCard.style.transform = "rotateX(0deg) rotateY(0deg)";
+          return;
+        }
+
+        var x = e.clientX - rect.left;
+        var y = e.clientY - rect.top;
+        var centerX = rect.width / 2;
+        var centerY = rect.height / 2;
+
+        // Match the project-card tilt math, without background parallax.
+        var rotateX = -((y - centerY) / centerY) * tiltStrength;
+        var rotateY = -((x - centerX) / centerX) * -tiltStrength;
+
+        activeCard.style.setProperty("--x", (x / rect.width) * 100 + "%");
+        activeCard.style.setProperty("--y", (y / rect.height) * 100 + "%");
+        activeCard.style.transform =
+          "rotateX(" + rotateX + "deg) rotateY(" + rotateY + "deg)";
       });
+
+      sliderRoot.addEventListener("mouseleave", function () {
+        resetTiltAll();
+      });
+
+      swiper.on("slideChange", resetTiltAll);
     }
-
-    function getActiveCard() {
-      return sliderRoot.querySelector(".swiper-slide-active .el-temoignages-item");
-    }
-
-    sliderRoot.addEventListener("mousemove", function (e) {
-      var activeCard = getActiveCard();
-      if (!activeCard) return;
-
-      var rect = activeCard.getBoundingClientRect();
-      if (
-        e.clientX < rect.left ||
-        e.clientX > rect.right ||
-        e.clientY < rect.top ||
-        e.clientY > rect.bottom
-      ) {
-        activeCard.style.transform = "rotateX(0deg) rotateY(0deg)";
-        return;
-      }
-
-      var x = e.clientX - rect.left;
-      var y = e.clientY - rect.top;
-      var centerX = rect.width / 2;
-      var centerY = rect.height / 2;
-
-      // Match the project-card tilt math, without background parallax.
-      var rotateX = -((y - centerY) / centerY) * tiltStrength;
-      var rotateY = -((x - centerX) / centerX) * -tiltStrength;
-
-      activeCard.style.setProperty("--x", (x / rect.width) * 100 + "%");
-      activeCard.style.setProperty("--y", (y / rect.height) * 100 + "%");
-      activeCard.style.transform =
-        "rotateX(" + rotateX + "deg) rotateY(" + rotateY + "deg)";
-    });
-
-    sliderRoot.addEventListener("mouseleave", function () {
-      resetTiltAll();
-    });
-
-    swiper.on("slideChange", resetTiltAll);
   }
 });
+
+/* Lazy-autoplay videos on scroll/visibility – deferred performance */
+(function () {
+  if (!("IntersectionObserver" in window)) {
+    /* Fallback: autoplay immediately if IntersectionObserver not supported */
+    document.querySelectorAll("[data-autoplay-on-visible]").forEach(function (video) {
+      video.autoplay = true;
+    });
+    return;
+  }
+
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      var video = entry.target;
+      if (entry.isIntersecting) {
+        video.autoplay = true;
+        video.play().catch(function () { /* muted=true makes autoplay more reliable */ });
+      } else {
+        video.autoplay = false;
+        video.pause();
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll("[data-autoplay-on-visible]").forEach(function (video) {
+    observer.observe(video);
+  });
+})();
 
 // Rotate focus accent on each Tab press (static color per focus, no continuous animation)
 (function () {
