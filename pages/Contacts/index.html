@@ -37,7 +37,7 @@
       rel="stylesheet"
       integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
       crossorigin="anonymous">
-    <script src="https://www.google.com/recaptcha/api.js?render=6LfSRKEsAAAAADRnmbrCg6mCL3ucmu6gWXymL1mg" async defer></script>
+    <script src="https://www.google.com/recaptcha/api.js"></script>
     <link rel="stylesheet" href="../../stylesheet/styles.css">
     <style>
       .contact-confetti-layer {
@@ -259,6 +259,9 @@
               <input type="hidden" name="to_email" value="perlin.amodino@gmail.com">
               <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response" value="">
               <input type="hidden" id="honeypot" name="website_url" value="" style="display: none;">
+              <div style="margin: 1.5rem 0; display: flex; justify-content: center;">
+                <div class="g-recaptcha" data-sitekey="6LfSYqEsAAAAAG_o8LS3WH7DOk46w25RhAEX7kQY"></div>
+              </div>
               <div class="contact-form-actions">
                 <button type="submit" class="home-cta-btn home-cta-btn-secondary">Send Message</button>
               </div>
@@ -340,7 +343,7 @@
           var EMAILJS_SERVICE_ID = "service_kd71q71";
           var EMAILJS_TEMPLATE_ID_PRODUCTION = "template_cfluv72";
           var EMAILJS_TEMPLATE_ID_LOCALHOST = "template_lpurowx";
-          var RECAPTCHA_SITE_KEY = "6LfSRKEsAAAAADRnmbrCg6mCL3ucmu6gWXymL1mg";
+          var RECAPTCHA_SITE_KEY = "6LfSYqEsAAAAAG_o8LS3WH7DOk46w25RhAEX7kQY";
 
           var note = document.getElementById("contact-form-note");
           var submitButton = form.querySelector('button[type="submit"]');
@@ -427,58 +430,27 @@
                 return;
               }
 
-              if (!window.grecaptcha || typeof window.grecaptcha.execute !== "function") {
+              if (!window.grecaptcha) {
                 if (window.console) console.warn("reCAPTCHA not loaded");
                 resolve("");
                 return;
               }
 
-              var tokenReceived = false;
-              var timeoutHandle = window.setTimeout(function () {
-                if (!tokenReceived) {
-                  if (window.console) console.warn("reCAPTCHA token request timeout");
-                  resolve("");
-                }
-              }, 5000);
-
-              var run = function () {
-                window.grecaptcha
-                  .execute(RECAPTCHA_SITE_KEY, { action: "contact_submit" })
-                  .then(function (token) {
-                    tokenReceived = true;
-                    window.clearTimeout(timeoutHandle);
-                    if (window.console) console.log("reCAPTCHA token generated:", token ? "✓" : "empty");
-                    resolve(token || "");
-                  })
-                  .catch(function (err) {
-                    tokenReceived = true;
-                    window.clearTimeout(timeoutHandle);
-                    if (window.console) console.error("reCAPTCHA token error:", err);
-                    resolve("");
-                  });
-              };
-
-              if (typeof window.grecaptcha.ready === "function") {
-                window.grecaptcha.ready(run);
-              } else {
-                run();
+              var token = window.grecaptcha.getResponse();
+              if (!token) {
+                if (window.console) console.warn("reCAPTCHA checkbox not checked");
               }
+              resolve(token || "");
             });
           }
 
           async function getRecaptchaTokenWithRetry(maxAttempts) {
-            maxAttempts = maxAttempts || 3;
-            for (var attempt = 0; attempt < maxAttempts; attempt++) {
-              if (attempt > 0) {
-                await new Promise(function (resolve) { setTimeout(resolve, 400 + attempt * 200); });
-              }
-              var token = await getRecaptchaToken();
-              if (token) {
-                if (window.console) console.log("✓ Token result on attempt", attempt + 1);
-                return token;
-              }
+            var token = await getRecaptchaToken();
+            if (token) {
+              if (window.console) console.log("✓ reCAPTCHA token retrieved");
+              return token;
             }
-            if (window.console) console.warn("Failed to acquire token after", maxAttempts, "attempts");
+            if (window.console) console.warn("reCAPTCHA token unavailable");
             return "";
           }
 
@@ -533,10 +505,10 @@
             var fullName = (firstName + " " + lastName).trim();
             
             setNote("Preparing to send...");
-            var recaptchaToken = isLocalhost ? "localhost-token" : await getRecaptchaTokenWithRetry(3);
+            var recaptchaToken = isLocalhost ? "localhost-bypass-token" : await getRecaptchaTokenWithRetry(3);
 
             if (!recaptchaToken && !isLocalhost) {
-              var msg = "⚠️ reCAPTCHA token generation failed. Please check your internet connection and try again.";
+              var msg = "⚠️ Please check the reCAPTCHA box to verify you're not a bot.";
               setNote(msg);
               if (submitButton) {
                 submitButton.disabled = false;
