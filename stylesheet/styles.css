@@ -244,6 +244,42 @@ img {
   z-index: 1;
 }
 
+.home-page .home-news-ticker {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1700;
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  overflow: hidden;
+  background: #000;
+  color: #fff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.home-page .home-news-ticker-track {
+  display: inline-flex;
+  align-items: center;
+  gap: 2.75rem;
+  white-space: nowrap;
+  min-width: max-content;
+  padding: 8px 0;
+  font-family: "Roboto", sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  animation: homeTickerScroll 32s linear infinite;
+}
+
+.home-page .home-news-ticker-track span::after {
+  content: "//";
+  margin-left: 2.75rem;
+  opacity: 0.65;
+}
+
 .home-page footer {
   z-index: 1601;
 }
@@ -258,12 +294,12 @@ img {
 
 .home-page .nav-home-hero-asset .nav-menu {
   position: fixed;
-  inset: 80px 40px auto auto;
+  inset: 65px 40px auto auto;
 }
 
 .home-page .nav-home-hero-asset .nav_logo-wrapper {
   position: fixed;
-  inset: 67px auto auto 40px;
+  inset: 52px auto auto 40px;
 }
 
 .nav_logo-wrapper img {
@@ -305,7 +341,21 @@ img {
   }
 }
 
+@keyframes homeTickerScroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .home-page .home-news-ticker-track {
+    animation: none;
+    transform: none;
+  }
+
   .home-page .home-bg-bubbles .bubble-lane,
   .home-page .home-bg-bubbles .bubble {
     animation: none;
@@ -513,6 +563,27 @@ h1 + p, h2 + p, p + p {
 
 
 
+/* ── Pixel Page Transition ─────────────────────────────────────────────────── */
+html.pixel-transition-preload body {
+  opacity: 0;
+}
+
+#pixel-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 9999998;
+  overflow: hidden;
+  background: transparent;
+  pointer-events: none;
+}
+
+#pixel-transition .px {
+  position: absolute;
+  border-radius: 50%;
+  background-color: #000000;
+  opacity: 1;
+  will-change: transform, opacity;
+}
 /* Mobile - screens 400px to 767px */
 @media screen and (min-width: 400px) and (max-width: 767px) {
   .hero-logo{
@@ -702,6 +773,14 @@ h1 + p, h2 + p, p + p {
   pointer-events: none;
 }
 
+.card-bg .card-bg-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .card-info {
   padding: 20px;
   position: absolute;
@@ -749,19 +828,20 @@ h1 + p, h2 + p, p + p {
 
 /* Projects page: lock cards into a clean 2x2 grid on md+ */
 .project-card-grid .row {
-  --bs-gutter-x: 2.25rem;
-  --bs-gutter-y: 2.25rem;
+  --bs-gutter-x: 0.35rem;
+  --bs-gutter-y: 5.5rem;
 }
 
 .project-card-grid .card-wrap {
   width: 100%;
-  max-width: none;
-  margin: 0;
+  max-width: 460px;
+  margin: 0 auto;
 }
 
 .project-card-grid .card {
   width: 100%;
-  height: 360px;
+  height: auto;
+  aspect-ratio: 3 / 4;
 }
 
 
@@ -775,6 +855,45 @@ h1 + p, h2 + p, p + p {
   height: 100vh;
   overflow: hidden;
   background: #fff;
+}
+
+.slider-close-link {
+  position: fixed !important;
+  top: 65px !important;
+  right: 40px !important;
+  z-index: 99999 !important;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #111;
+  font-size: 2rem;
+  font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
+  border-radius: 50%;
+  background: transparent;
+  border: 1.5px solid #111;
+  pointer-events: auto !important;
+  transition: background 0.2s, color 0.2s;
+}
+
+.slider-close-link:hover {
+  background: #111;
+  color: #fff;
+}
+
+.slider-close-link:focus-visible {
+  outline: 2px solid var(--focus-accent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 479px) {
+  .slider-close-link {
+    top: 55px !important;
+    right: 30px !important;
+  }
 }
 
 /* ── Track ── */
@@ -1128,7 +1247,7 @@ footer {
   align-items: center;
   justify-content: center;
   position: absolute;
-  inset: 80px 40px auto auto;
+  inset: 65px 40px auto auto;
 }
 
 .nav-home-hero-asset .menu-icon,
@@ -1156,7 +1275,7 @@ footer {
   height: auto;
   margin-left: 0;
   position: absolute;
-  inset: 67px auto auto 40px;
+  inset: 52px auto auto 40px;
 }
 
 .nav-home-hero-asset .nav_logo-wrapper svg {
@@ -1204,7 +1323,7 @@ footer {
   align-items: center;
   justify-content: center;
   position: absolute;
-  inset: 80px 40px auto auto;
+  inset: 65px 40px auto auto;
   pointer-events: auto;
 }
 
@@ -1347,7 +1466,7 @@ footer {
 @media (max-width: 479px) {
   .nav-home-hero-asset .nav-menu,
   .nav-home-hero-asset .close-menu {
-    top: 70px;
+    top: 55px;
     right: 30px;
   }
 
@@ -1368,7 +1487,7 @@ footer {
   }
 
   .nav-home-hero-asset .nav_logo-wrapper {
-    top: 57px;
+    top: 42px;
   }
 }
 
@@ -1440,14 +1559,32 @@ footer {
   overflow: visible; /* allow cards to animate past the wrapper edge without clipping */
 }
 
+/* Ensure Swiper internals don't clip active card tilt */
+.testimonials-section .swiper,
+.testimonials-section .swiper-wrapper,
+.testimonials-section .swiper-slide {
+  overflow: visible;
+}
+
 /* Swiper requires position:relative on each slide */
 .testimonials-section .swiper-slide {
   position: relative;
 }
 
+.testimonials-section .swiper-slide.swiper-slide-active {
+  perspective: 800px;
+}
+
 /* Card — white background; Swiper cards effect applies box-shadow / stacking */
 .testimonials-section .el-temoignages-item {
   background-color: #fff;
+  border-radius: 10px;
+  position: relative;
+  border: 1.5px solid #333;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.45);
+  transform-style: preserve-3d;
+  transition: transform 220ms ease-out;
+  will-change: transform;
   overflow: hidden;
 }
 
@@ -1469,7 +1606,7 @@ footer {
 
 /* Caption row beneath the photo */
 .testimonials-section .el-temoignages-caption {
-  gap: 20px;
+  gap: 0;
   align-items: center;
   padding: 20px 25px 20px 20px;
   display: flex;
@@ -1477,11 +1614,7 @@ footer {
 
 /* Round portrait thumbnail */
 .testimonials-section .el-temoignages-portrait {
-  object-fit: cover;
-  border-radius: 100px;
-  flex: none;
-  width: 70px;
-  height: 70px;
+  display: none;
 }
 
 /* Quote text */
@@ -1489,6 +1622,16 @@ footer {
   margin-bottom: 0;
   font-size: 18px;
   line-height: 24px;
+}
+
+.testimonials-section .testimonial-card-title {
+  margin: 0 0 8px;
+  font-family: "Luckiest Guy", sans-serif;
+  font-size: clamp(1.45rem, 1.1rem + 1vw, 1.95rem);
+  line-height: 1.12;
+  font-weight: 400;
+  letter-spacing: 0.015em;
+  color: #161616;
 }
 
 /* CTA link at the bottom of each card */
@@ -1607,6 +1750,10 @@ footer {
   .testimonials-section .el-temoignages-caption {
     text-align: left;
   }
+  .testimonials-section .testimonial-card-title {
+    font-size: clamp(1.3rem, 1.08rem + 1.1vw, 1.6rem);
+    line-height: 1.1;
+  }
   .testimonials-section .el-temoignage-txt-wrapper {
     margin-top: 16px;
     margin-bottom: 20px;
@@ -1630,7 +1777,7 @@ footer {
   .testimonials-section .swiper-slider-wrapper {
     width: 95%;
     max-width: 95vw;
-    overflow: hidden;
+    overflow: visible;
   }
 }
 
@@ -1680,6 +1827,12 @@ footer {
   .home-wave-track {
     animation: none;
   }
+
+  .home-cta-section {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
 
 @media screen and (max-width: 767px) {
@@ -1693,6 +1846,14 @@ footer {
   display: flex;
   justify-content: center;
   padding: 30px 20px 50px;
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 420ms ease, transform 520ms cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+.home-cta-section.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .home-cta-card {
@@ -2072,7 +2233,7 @@ footer {
   font-weight: 700;
   font-size: 1.02rem;
   list-style: none;
-  padding: 14px 44px 14px 16px;
+  padding: 21px 44px 14px 16px;
   background: transparent;
   position: relative;
 }
@@ -2114,7 +2275,7 @@ footer {
 
 .about-page .about-faq-item p {
   margin: 0;
-  padding: 14px 16px 16px;
+  padding: 18px 16px 16px;
   font-family: "Roboto", sans-serif;
 }
 

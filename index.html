@@ -1,8 +1,15 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <script>
+      try {
+        if (sessionStorage.getItem("pixelTransitionPending") === "1") {
+          document.documentElement.classList.add("pixel-transition-preload");
+        }
+      } catch (e) {}
+    </script>
     <meta
       name="description"
       content="Amodino UX design portfolio featuring accessible, playful web experiences and project case studies.">
@@ -30,6 +37,18 @@
   </head>
   <body class="d-flex flex-column min-vh-100 home-page">
     <a class="skip-link" href="#main-content">Skip to main content</a>
+    <aside class="home-news-ticker" aria-label="Amodino studio bulletin">
+      <p class="visually-hidden">
+        Amodino studio bulletin: Breaking news, local designer discovers that fun and accessibility can coexist. Traffic update, more playful websites are moving into the fast lane. Market watch, bold UX decisions are up while boring interfaces are down. Weather alert, scattered bursts of delight expected across all digital experiences.
+      </p>
+      <div class="home-news-ticker-track" aria-hidden="true">
+        <span>BREAKING: Local design studio confirms that the curly 'ñ' isn't actually that hard to pronounce.</span>
+        <span>TRAFFIC: Strong user flow reported, minor delays only for boring websites.</span>
+        <span>INTERVIEW: Local amodiño designer shares insights: "I'm actually just one guy and need a job like, really badly."</span>
+        <span>WEATHER: Scattered bursts of silly lil guys expected across digital experiences through late evening.</span>
+        <span>BREAKING: Local design studio confirms that the curly 'ñ' isn't actually that hard to pronounce.</span>
+      </div>
+    </aside>
     <div class="home-bg-bubbles" aria-hidden="true" role="presentation">
       <span class="bubble-lane"><span class="bubble"></span></span>
       <span class="bubble-lane"><span class="bubble"></span></span>
@@ -132,11 +151,11 @@
           </a>
         </div>
         <nav id="menu-links" aria-label="Main navigation">
-          <a href="./" class="full-menu-link">Home</a>
-          <a href="projects/" class="full-menu-link">Projects</a>
-          <a href="pages/about/" class="full-menu-link">About</a>
-          <a href="#" class="full-menu-link">Resume</a>
-          <a href="pages/Contacts/" class="full-menu-link">Contact</a>
+          <a href="./" class="full-menu-link" data-pixel-transition>Home</a>
+          <a href="projects/" class="full-menu-link" data-pixel-transition>Projects</a>
+          <a href="about/" class="full-menu-link" data-pixel-transition>About</a>
+          <a href="projects/Dust-Buddies-Project/" class="full-menu-link" data-pixel-transition>Resume</a>
+          <a href="contacts/" class="full-menu-link" data-pixel-transition>Contact</a>
         </nav>
         <div id="menu-contact" class="center">
           <div class="grey-txt">Let's keep in touch!</div>
@@ -187,6 +206,7 @@
           </div>
           <div
             class="swiper testimonials-slider-wrapper swiper-slider-wrapper w-dyn-list swiper-cards swiper-3d"
+            role="region"
             aria-roledescription="carousel"
             aria-label="Client testimonials"
             aria-describedby="testimonials-subtext testimonials-keyboard-help"
@@ -235,10 +255,11 @@
                       "
                       class="testimonial-portrait el-temoignages-portrait">
                     <div class="testimonial-copy el-temoignage-rte w-richtext">
+                      <h3 class="testimonial-card-title">UX Strategy</h3>
                       <p>
-                        <strong>UX Strategy</strong>: "Modern UX design and
-                        clear information architecture improve navigation, lower
-                        bounce rates, and support stronger SEO performance."
+                        "Modern UX design and clear information architecture
+                        improve navigation, lower bounce rates, and support
+                        stronger SEO performance."
                       </p>
                     </div>
                   </div>
@@ -274,11 +295,11 @@
                       src="https://cdn.prod.website-files.com/5e6ca496a2ae9775df236796/655dc4283018eb0dda5f16db_DSC_5974%20-%20profil.webp"
                       class="testimonial-portrait el-temoignages-portrait">
                     <div class="testimonial-copy el-temoignage-rte w-richtext">
+                      <h3 class="testimonial-card-title">Web Development</h3>
                       <p>
-                        <strong>Web Development</strong>: "Responsive web
-                        development, semantic HTML, and accessible content
-                        structure help search engines understand pages and users
-                        find content faster."
+                        "Responsive web development, semantic HTML, and
+                        accessible content structure help search engines
+                        understand pages and users find content faster."
                       </p>
                     </div>
                   </div>
@@ -314,11 +335,11 @@
                       src="https://cdn.prod.website-files.com/5e6ca496a2ae9775df236796/6374b5051e141f2a927b8072_309268593_756876602217943_3889515839484552472_n.webp"
                       class="testimonial-portrait el-temoignages-portrait">
                     <div class="testimonial-copy el-temoignage-rte w-richtext">
+                      <h3 class="testimonial-card-title">Technical SEO</h3>
                       <p>
-                        <strong>Technical SEO</strong>: "Performance-focused
-                        front-end work, optimized media, and clean internal
-                        linking can improve Core Web Vitals and strengthen
-                        organic visibility."
+                        "Performance-focused front-end work, optimized media,
+                        and clean internal linking can improve Core Web Vitals
+                        and strengthen organic visibility."
                       </p>
                     </div>
                   </div>
@@ -354,11 +375,11 @@
                       src="https://cdn.prod.website-files.com/5e6ca496a2ae9775df236796/6374b18da0244d03ca324c9d_156258644_128559339114663_7259496485364537988_n.webp"
                       class="testimonial-portrait el-temoignages-portrait">
                     <div class="testimonial-copy el-temoignage-rte w-richtext">
+                      <h3 class="testimonial-card-title">Social Media Marketing</h3>
                       <p>
-                        <strong>Content + Conversion</strong>: "User-first
-                        layouts, keyword-aligned content, and conversion-focused
-                        UX patterns can increase engagement while keeping the
-                        experience accessible."
+                        "User-first layouts, keyword-aligned content, and
+                        conversion-focused UX patterns can increase engagement
+                        while keeping the experience accessible."
                       </p>
                     </div>
                   </div>
@@ -422,7 +443,8 @@
           </p>
           <div class="home-cta-actions">
             <a
-              href="mailto:perlin.amodino@gmail.com"
+              href="contacts/"
+              data-pixel-transition
               class="home-cta-btn home-cta-btn-secondary"
               >Let's chat!</a
             >
@@ -448,15 +470,15 @@
             <div class="col-12">
               <div class="footer_menu">
                 <ul>
-                  <li><a href="./">Home</a></li>
-                  <li><a href="pages/about/">About</a></li>
-                  <li><a href="projects/">Projects</a></li>
-                  <li><a href="#">Resume</a></li>
-                  <li><a href="pages/Contacts/">Contact</a></li>
+                  <li><a data-pixel-transition href="./">Home</a></li>
+                  <li><a data-pixel-transition href="about/">About</a></li>
+                  <li><a data-pixel-transition href="projects/">Projects</a></li>
+                  <li><a data-pixel-transition href="projects/Dust-Buddies-Project/">Resume</a></li>
+                  <li><a data-pixel-transition href="contacts/">Contact</a></li>
                 </ul>
               </div>
               <div class="footer_copyright">
-                <p>© 2026 Amodino - Otheos Made. All Rights Reserved.</p>
+                <p>© 2026 Amodino. All Rights Reserved.</p>
               </div>
               <div class="footer_profile">
                 <ul>
@@ -491,8 +513,7 @@
                         <path
                           d="M3 6.75C3 5.78 3.78 5 4.75 5H19.25C20.22 5 21 5.78 21 6.75V17.25C21 18.22 20.22 19 19.25 19H4.75C3.78 19 3 18.22 3 17.25V6.75ZM4.75 6.5L12 11.58L19.25 6.5H4.75ZM19.5 7.74L12.43 12.69C12.17 12.87 11.83 12.87 11.57 12.69L4.5 7.74V17.25C4.5 17.39 4.61 17.5 4.75 17.5H19.25C19.39 17.5 19.5 17.39 19.5 17.25V7.74Z"
                           fill="currentColor"
-                        /></svg
-                    ></a>
+                        /></svg></a>
                   </li>
                 </ul>
               </div>
@@ -505,6 +526,10 @@
       defer="defer"
       src="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.js"
     ></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+    <script defer="defer" src="script/pixel-transition.js"></script>
     <script defer="defer" src="script/script.js"></script>
   </body>
 </html>
+
+

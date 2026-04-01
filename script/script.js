@@ -148,6 +148,66 @@ cards.forEach((cardWrap) => {
   setMenuState(false);
 })();
 
+/* Home hero entrance animation (desktop only) */
+document.addEventListener("DOMContentLoaded", function () {
+  var body = document.body;
+  if (!body || !body.classList.contains("home-page")) return;
+  if (window.matchMedia("(max-width: 991px)").matches) return;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (typeof window.gsap === "undefined") return;
+
+  var heroLogo = document.querySelector(".home-page header .hero-logo");
+  var heroArrow = document.querySelector(".home-page header .lrg-img-pointer");
+  if (!heroLogo || !heroArrow) return;
+
+  gsap.set(heroLogo, { x: -180, autoAlpha: 0 });
+  gsap.set(heroArrow, { autoAlpha: 0, scale: 0.68, transformOrigin: "50% 50%" });
+
+  var timeline = gsap.timeline({ defaults: { ease: "power3.out" } });
+  timeline.to(heroLogo, {
+    x: 0,
+    autoAlpha: 1,
+    duration: 0.9,
+  });
+  timeline.to(heroArrow, {
+    autoAlpha: 1,
+    scale: 1,
+    duration: 0.38,
+    ease: "back.out(1.8)",
+  }, "-=0.02");
+});
+
+/* Home CTA reveal on scroll */
+document.addEventListener("DOMContentLoaded", function () {
+  var cta = document.querySelector(".home-page .home-cta-section");
+  if (!cta) return;
+
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    cta.classList.add("is-revealed");
+    return;
+  }
+
+  if (!("IntersectionObserver" in window)) {
+    cta.classList.add("is-revealed");
+    return;
+  }
+
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        cta.classList.add("is-revealed");
+        observer.disconnect();
+      }
+    });
+  }, {
+    root: null,
+    threshold: 0.18,
+    rootMargin: "0px 0px -6% 0px"
+  });
+
+  observer.observe(cta);
+});
+
 // Prefetch pages on hover/focus for near-instant navigation
 (function () {
   var prefetched = new Set();
@@ -231,6 +291,57 @@ document.addEventListener("DOMContentLoaded", function () {
   swiper.on("autoplayStop", function () {
     if (liveRegion) liveRegion.setAttribute("aria-live", "polite");
   });
+
+  /* Foremost card tilt (active slide only) */
+  if (!reducedMotion) {
+    var tiltStrength = 7;
+
+    function resetTiltAll() {
+      sliderRoot.querySelectorAll(".el-temoignages-item").forEach(function (card) {
+        card.style.transform = "rotateX(0deg) rotateY(0deg)";
+      });
+    }
+
+    function getActiveCard() {
+      return sliderRoot.querySelector(".swiper-slide-active .el-temoignages-item");
+    }
+
+    sliderRoot.addEventListener("mousemove", function (e) {
+      var activeCard = getActiveCard();
+      if (!activeCard) return;
+
+      var rect = activeCard.getBoundingClientRect();
+      if (
+        e.clientX < rect.left ||
+        e.clientX > rect.right ||
+        e.clientY < rect.top ||
+        e.clientY > rect.bottom
+      ) {
+        activeCard.style.transform = "rotateX(0deg) rotateY(0deg)";
+        return;
+      }
+
+      var x = e.clientX - rect.left;
+      var y = e.clientY - rect.top;
+      var centerX = rect.width / 2;
+      var centerY = rect.height / 2;
+
+      // Match the project-card tilt math, without background parallax.
+      var rotateX = -((y - centerY) / centerY) * tiltStrength;
+      var rotateY = -((x - centerX) / centerX) * -tiltStrength;
+
+      activeCard.style.setProperty("--x", (x / rect.width) * 100 + "%");
+      activeCard.style.setProperty("--y", (y / rect.height) * 100 + "%");
+      activeCard.style.transform =
+        "rotateX(" + rotateX + "deg) rotateY(" + rotateY + "deg)";
+    });
+
+    sliderRoot.addEventListener("mouseleave", function () {
+      resetTiltAll();
+    });
+
+    swiper.on("slideChange", resetTiltAll);
+  }
 });
 
 // Rotate focus accent on each Tab press (static color per focus, no continuous animation)

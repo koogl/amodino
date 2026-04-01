@@ -5,28 +5,28 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <script>
       try {
-        if (sessionStorage.getItem('pixelTransitionPending') === '1') {
-          document.documentElement.classList.add('pixel-transition-preload');
+        if (sessionStorage.getItem("pixelTransitionPending") === "1") {
+          document.documentElement.classList.add("pixel-transition-preload");
         }
       } catch (e) {}
     </script>
     <meta
       name="description"
-      content="Explore Amodino UX project case studies, including Macon County and Dust Buddies design work.">
+      content="Learn about Amodino, Jessica Perlin, and the design approach behind accessible, playful digital experiences.">
     <meta name="robots" content="index,follow">
     <meta name="theme-color" content="#ffffff">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Amodino Projects">
+    <meta property="og:title" content="About Amodino">
     <meta
       property="og:description"
-      content="Explore Amodino UX project case studies, including Macon County and Dust Buddies design work.">
+      content="Learn about Amodino, Jessica Perlin, and the design approach behind accessible, playful digital experiences.">
     <meta property="og:url" content="./">
     <meta property="og:image" content="../images/amodino-logo.svg">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Amodino Projects">
+    <meta name="twitter:title" content="About Amodino">
     <meta
       name="twitter:description"
-      content="Explore Amodino UX project case studies, including Macon County and Dust Buddies design work.">
+      content="Learn about Amodino, and the design approach behind accessible, playful digital experiences.">
     <meta name="twitter:image" content="../images/amodino-logo.svg">
     <link rel="canonical" href="./">
     <link rel="icon" href="../images/amodino-logo.svg">
@@ -48,9 +48,9 @@
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "CollectionPage",
-        "name": "Amodino Projects",
-        "description": "Explore the personal project portfolio of Jessica Perlin, including various graphic and UX design work.",
+        "@type": "AboutPage",
+        "name": "About Amodino",
+        "description": "Learn about Amodino, and the design approach behind accessible, playful digital experiences.",
         "url": "./",
         "publisher": {
           "@type": "Person",
@@ -62,9 +62,9 @@
         }
       }
     </script>
-    <title>Amodino - Projects</title>
+    <title>Amodino - About</title>
   </head>
-  <body class="d-flex flex-column min-vh-100 projects-page">
+  <body class="d-flex flex-column min-vh-100 projects-page about-page">
     <a class="skip-link" href="#main-content">Skip to main content</a>
     <div id="nav-home-hero-asset-root" class="nav-home-hero-asset">
       <button
@@ -156,9 +156,9 @@
         </div>
         <nav id="menu-links" aria-label="Main navigation">
           <a href="../" class="full-menu-link" data-pixel-transition>Home</a>
-          <a href="./" class="full-menu-link" data-pixel-transition>Projects</a>
-          <a href="../about/" class="full-menu-link" data-pixel-transition>About</a>
-          <a href="./Dust-Buddies-Project/" class="full-menu-link"
+          <a href="../projects/" class="full-menu-link" data-pixel-transition>Projects</a>
+          <a href="./" class="full-menu-link" data-pixel-transition>About</a>
+          <a href="../projects/Dust-Buddies-Project/" class="full-menu-link"
              data-pixel-transition>Resume</a
           >
           <a href="../contacts/" class="full-menu-link" data-pixel-transition>Contact</a>
@@ -184,129 +184,163 @@
           alt="Amodino Logo">
       </a>
     </div>
-    <header class="mb-5">
-      <h1 class="title pt-4">Check out my stuff :)</h1>
-      <h2 class="subtitle">Case studies for various clients</h2>
-    </header>
-    <main id="main-content" class="container project-card-grid pt-3 pb-4">
-      <div class="row g-3 justify-content-center">
-        <div class="col-12 col-md-6 d-flex">
-          <a
-            href="./Macon-County-Project/"
-            class="card-wrap"
-            aria-label="Macon County - UX Design"
-           data-pixel-transition>
-            <div class="card">
-              <div
-                class="card-bg"
-              >
-                <video
-                  class="card-bg-video"
-                  autoplay
-                  loop
-                  muted
-                  playsinline
-                  preload="metadata"
+    <main id="main-content" class="container pt-5 pb-4">
+      <h1 class="visually-hidden">About Amodino</h1>
+      <section class="row about-intro-layout g-4 g-lg-5 align-items-start">
+        <div class="col-12 col-lg-5">
+          <div class="about-photo-stack" role="group" aria-label="Photo placeholder gallery">
+            <figure class="about-photo-card about-photo-card-a mb-0">
+              <img
+                src="../images/about-placeholder-profile.svg"
+                alt="Primary profile photo placeholder"
+                class="about-photo-placeholder"
+                loading="lazy"
+                decoding="async"
+                width="640"
+                height="760">
+              <figcaption class="visually-hidden">
+                Placeholder image area for a future primary profile photo.
+              </figcaption>
+            </figure>
+
+            <figure class="about-photo-card about-photo-card-b mb-0">
+              <img
+                src="../images/about-placeholder-profile.svg"
+                alt="Secondary profile photo placeholder"
+                class="about-photo-placeholder"
+                loading="lazy"
+                decoding="async"
+                width="640"
+                height="760">
+              <figcaption class="visually-hidden">
+                Placeholder image area for a future secondary profile photo.
+              </figcaption>
+            </figure>
+
+            <figure class="about-photo-card about-photo-card-c mb-0">
+              <img
+                src="../images/about-placeholder-profile.svg"
+                alt="Third profile photo placeholder"
+                class="about-photo-placeholder"
+                loading="lazy"
+                decoding="async"
+                width="640"
+                height="760">
+              <figcaption class="visually-hidden">
+                Placeholder image area for a future third profile photo.
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+        <div class="col-12 col-lg-7">
+          <div class="about-right-panel">
+            <div class="about-intro-copy">
+              <p class="subtitle mb-4 about-hi" aria-label="Hi.">
+                <span>Hi</span>
+                <img
+                  src="../images/about-hi-star.svg"
+                  class="about-hi-star"
+                  alt=""
                   aria-hidden="true"
-                >
-                  <source src="../images/Macon-Reel.mp4" type="video/mp4">
-                </video>
-              </div>
-              <div class="card-info">
-                <h2 class="text-start">Macon County:<br>UX Redesign</h2>
-                <p class="text-start">
-                  Explore how a full UX and web design refresh improved clarity,
-                  accessibility, and navigation for Macon County's public
-                  website.
-                </p>
-              </div>
+                  width="28"
+                  height="28">
+              </p>
+              <p class="fs-5">
+                I build websites and digital experiences that are playful,
+                clear, and accessible. My process combines UX strategy,
+                interaction design, and front-end implementation so ideas can
+                move quickly from concept to polished product.
+              </p>
+              <p class="fs-5">
+                Amodino focuses on balancing personality with usability, making
+                sure every project feels memorable while still being fast,
+                responsive, and easy to navigate.
+              </p>
             </div>
-          </a>
+
+            <section class="about-faq" aria-label="About frequently asked questions">
+              <h2 class="about-faq-title">FAQ</h2>
+
+              <details class="about-faq-item">
+                <summary>My Credentials</summary>
+                <div class="about-faq-content">
+                  <p>
+                    I am currently finishing my associate's degree and actively
+                    looking for a permanent role, training opportunity, or
+                    internship in UX/UI design. Along the way, I earned the
+                    Google Coursera Web UX Designer certificate, and I was
+                    recognized for maintaining a high GPA at WTCC in both spring
+                    and fall 2024 with a seat in Phi Theta Kappa National Honor
+                    Society. I also accepted the Coca-Cola Leaders of Promise
+                    scholarship award from my local chapter in 2025.
+                  </p>
+                </div>
+              </details>
+
+              <details class="about-faq-item">
+                <summary>My Skills</summary>
+                <div class="about-faq-content">
+                  <p>
+                    During my internships, I spent a lot of time working in
+                    Adobe CC, Figma, and CRM tools, which helped me build a
+                    strong design foundation in illustration, layout, and
+                    user-centered thinking. As I continue my education, I am
+                    also growing my front-end confidence with HTML, CSS, and
+                    other coding languages used in the field.
+                  </p>
+                </div>
+              </details>
+
+              <details class="about-faq-item">
+                <summary>My Mission</summary>
+                <div class="about-faq-content">
+                  <p>
+                    At the core of my work, I want users to feel comfortable,
+                    supported, and included, especially people with different
+                    accessibility needs. I believe great UX can be both
+                    personalized and simple to use, and no one should be left
+                    behind. Founding Raleigh's St. Joseph's Coffee Run
+                    volunteering community also taught me a lot about
+                    advertising, community management, and quick
+                    problem-solving.
+                  </p>
+                </div>
+              </details>
+
+              <details class="about-faq-item">
+                <summary>My Contacts</summary>
+                <div class="about-faq-content">
+                  <p>
+                    Feel free to reach out anytime. I am always happy to talk
+                    about job opportunities, make new connections, or just have
+                    a chat. You can contact me directly at
+                    <a href="mailto:perlin.amodino@gmail.com">perlin.amodino@gmail.com</a>
+                    or connect with me on
+                    <a
+                      href="https://www.linkedin.com/in/jessica-perlin-b281b030b/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >LinkedIn</a>.
+                  </p>
+                </div>
+              </details>
+            </section>
+          </div>
         </div>
-        <div class="col-12 col-md-6 d-flex">
-          <a
-            href="./Dust-Buddies-Project/"
-            class="card-wrap"
-            aria-label="Dust Buddies - Figma"
-           data-pixel-transition>
-            <div class="card">
-              <div
-                class="card-bg"
-                style="
-                  background-image: url(&quot;https://picsum.photos/id/1015/600/400&quot;);
-                "
-              ></div>
-              <div class="card-info">
-                <h2 class="text-start">Dust Buddies:<br>UX + UI</h2>
-                <p class="text-start">
-                  See the UX strategy, interaction flows, and interface design
-                  system behind this custom app concept in active development.
-                </p>
-              </div>
-            </div>
-          </a>
-        </div>
-        <div class="col-12 col-md-6 d-flex">
-          <a
-            href="./Fork-in-the-road-project/"
-            class="card-wrap"
-            aria-label="Fork in the Road - Micro-interactions"
-           data-pixel-transition>
-            <div class="card">
-              <div
-                class="card-bg"
-              >
-                <video
-                  class="card-bg-video"
-                  autoplay
-                  loop
-                  muted
-                  playsinline
-                  preload="metadata"
-                  aria-hidden="true"
-                >
-                  <source src="../images/fork-reel.mp4" type="video/mp4">
-                </video>
-              </div>
-              <div class="card-info">
-                <h2 class="text-start">Fork in the Road:</h2>
-                <h3 class="text-start">UX Micro-Interactions</h3>
-                <p class="text-start">
-                  Review the motion and interaction design work that supports
-                  wayfinding, feedback, and usability in a farm-to-table
-                  shopping experience.
-                </p>
-              </div>
-            </div>
-          </a>
-        </div>
-        <div class="col-12 col-md-6 d-flex">
-          <a
-            href="./hands-project/"
-            class="card-wrap"
-            aria-label="HANDS Art Center - Agile"
-           data-pixel-transition>
-            <div class="card">
-              <div
-                class="card-bg"
-                style="
-                  background-image: url(&quot;https://cdn.wallpapersafari.com/97/46/dj5FLm.jpg&quot;);
-                "
-              ></div>
-              <div class="card-info">
-                <h2 class="text-start">HANDS Art Center:<br>Web UX</h2>
-                <p class="text-start">
-                  Dive into the UX research, content structure, and responsive
-                  web design decisions used to modernize the HANDS Art Center
-                  experience.
-                </p>
-              </div>
-            </div>
-          </a>
-        </div>
-      </div>
+      </section>
     </main>
-    <footer>
+    <footer class="mt-5">
+      <video
+        autoplay
+        loop
+        muted
+        playsinline
+        preload="none"
+        class="px-5 pb-5 hero-logo blinker"
+        aria-hidden="true"
+      >
+        <source src="../images/animated-blinker-mascot.mp4" type="video/mp4">
+      </video>
       <div class="footer">
         <div class="container">
           <div class="row text-center">
@@ -314,9 +348,9 @@
               <div class="footer_menu">
                 <ul>
                   <li><a data-pixel-transition href="../">Home</a></li>
-                  <li><a data-pixel-transition href="../about/">About</a></li>
-                  <li><a data-pixel-transition href="./">Projects</a></li>
-                  <li><a data-pixel-transition href="./Dust-Buddies-Project/">Resume</a></li>
+                  <li><a data-pixel-transition href="./">About</a></li>
+                  <li><a data-pixel-transition href="../projects/">Projects</a></li>
+                  <li><a data-pixel-transition href="../projects/Dust-Buddies-Project/">Resume</a></li>
                   <li><a data-pixel-transition href="../contacts/">Contact</a></li>
                 </ul>
               </div>
@@ -371,5 +405,4 @@
     </footer>
   </body>
 </html>
-
 
