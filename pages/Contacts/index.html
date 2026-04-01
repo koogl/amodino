@@ -401,6 +401,49 @@
             emailjs.init(EMAILJS_PUBLIC_KEY);
           }
 
+          var pageLoadedAt = Date.now();
+          var hasHumanSignal = false;
+
+          function markHumanSignal() {
+            hasHumanSignal = true;
+          }
+
+          document.addEventListener("pointerdown", markHumanSignal, { passive: true });
+          document.addEventListener("keydown", markHumanSignal, { passive: true });
+          document.addEventListener("touchstart", markHumanSignal, { passive: true });
+
+          function getRecaptchaToken() {
+            return new Promise(function (resolve) {
+              if (!window.grecaptcha || typeof window.grecaptcha.execute !== "function") {
+                resolve("");
+                return;
+              }
+
+              var run = function () {
+                window.grecaptcha
+                  .execute(RECAPTCHA_SITE_KEY, { action: "contact_submit" })
+                  .then(function (token) {
+                    resolve(token || "");
+                  })
+                  .catch(function () {
+                    resolve("");
+                  });
+              };
+
+              if (typeof window.grecaptcha.ready === "function") {
+                window.grecaptcha.ready(run);
+              } else {
+                run();
+              }
+            });
+          }
+
+          async function sendViaEmailJs(templateParams) {
+            return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams, {
+              publicKey: EMAILJS_PUBLIC_KEY
+            });
+          }
+
           form.addEventListener("submit", async function (event) {
             event.preventDefault();
 
@@ -425,18 +468,20 @@
               submitButton.textContent = "Sending...";
             }
 
+            if (!hasHumanSignal || Date.now() - pageLoadedAt < 1000) {
+              setNote("Please interact with the page, then submit again.");
+              if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = "Send Message";
+              }
+              return;
+            }
+
             var firstName = form.querySelector("#first-name").value.trim();
             var lastName = form.querySelector("#last-name").value.trim();
             var senderEmail = form.querySelector("#email").value.trim();
             var fullName = (firstName + " " + lastName).trim();
-            var recaptchaToken = "";
-            if (window.grecaptcha && typeof window.grecaptcha.execute === "function") {
-              try {
-                recaptchaToken = await window.grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: "contact_submit" });
-              } catch (recaptchaError) {
-                recaptchaToken = "";
-              }
-            }
+            var recaptchaToken = await getRecaptchaToken();
 
             if (!recaptchaToken) {
               setNote("reCAPTCHA validation failed. Please refresh and try again.");
@@ -466,29 +511,44 @@
               "g-recaptcha-response": recaptchaToken
             };
 
-            emailjs
-              .send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams, {
-                publicKey: EMAILJS_PUBLIC_KEY
-              })
-              .then(function () {
+            try {
+              try {
+                await sendViaEmailJs(templateParams);
+              } catch (firstError) {
+                var firstText = (firstError && (firstError.text || firstError.message)) || "";
+                var looksLikeBotDetection = /bot is detected|recaptcha/i.test(String(firstText));
+
+                if (looksLikeBotDetection) {
+                  var retryToken = await getRecaptchaToken();
+                  if (retryToken) {
+                    templateParams["g-recaptcha-response"] = retryToken;
+                    if (recaptchaResponseHidden) recaptchaResponseHidden.value = retryToken;
+                  }
+                }
+
+                if (!looksLikeBotDetection || !templateParams["g-recaptcha-response"]) {
+                  throw firstError;
+                }
+
+                await sendViaEmailJs(templateParams);
+              }
+
                 setNote("Message sent successfully. Thank you!");
                 launchConfetti();
                 form.reset();
                 if (recaptchaResponseHidden) recaptchaResponseHidden.value = "";
-              })
-              .catch(function (error) {
+              } catch (error) {
                 if (window.console && typeof window.console.error === "function") {
                   window.console.error("EmailJS send failed:", error);
                 }
                 var detail = error && (error.text || error.message) ? " (" + (error.text || error.message) + ")" : "";
                 setNote("Something went wrong. Please try again." + detail);
-              })
-              .finally(function () {
+              } finally {
                 if (submitButton) {
                   submitButton.disabled = false;
                   submitButton.textContent = "Send Message";
                 }
-              });
+              }
           });
         })();
       </script>
