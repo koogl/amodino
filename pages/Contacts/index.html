@@ -438,6 +438,18 @@
             });
           }
 
+          async function getRecaptchaTokenWithRetry(maxAttempts) {
+            maxAttempts = maxAttempts || 3;
+            for (var attempt = 0; attempt < maxAttempts; attempt++) {
+              var token = await getRecaptchaToken();
+              if (token) return token;
+              if (attempt < maxAttempts - 1) {
+                await new Promise(function (resolve) { setTimeout(resolve, 200 + attempt * 100); });
+              }
+            }
+            return "";
+          }
+
           async function sendViaEmailJs(templateParams) {
             return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams, {
               publicKey: EMAILJS_PUBLIC_KEY
@@ -481,7 +493,7 @@
             var lastName = form.querySelector("#last-name").value.trim();
             var senderEmail = form.querySelector("#email").value.trim();
             var fullName = (firstName + " " + lastName).trim();
-            var recaptchaToken = await getRecaptchaToken();
+            var recaptchaToken = await getRecaptchaTokenWithRetry(3);
 
             if (!recaptchaToken) {
               setNote("reCAPTCHA validation failed. Please refresh and try again.");
@@ -512,43 +524,53 @@
             };
 
             try {
-              try {
-                await sendViaEmailJs(templateParams);
-              } catch (firstError) {
-                var firstText = (firstError && (firstError.text || firstError.message)) || "";
-                var looksLikeBotDetection = /bot is detected|recaptcha/i.test(String(firstText));
+              var sendAttempt = 0;
+              var sendSucceeded = false;
+              var lastSendError = null;
 
-                if (looksLikeBotDetection) {
-                  var retryToken = await getRecaptchaToken();
-                  if (retryToken) {
-                    templateParams["g-recaptcha-response"] = retryToken;
-                    if (recaptchaResponseHidden) recaptchaResponseHidden.value = retryToken;
+              while (sendAttempt < 4 && !sendSucceeded) {
+                try {
+                  await sendViaEmailJs(templateParams);
+                  sendSucceeded = true;
+                } catch (sendError) {
+                  lastSendError = sendError;
+                  var errorText = (sendError && (sendError.text || sendError.message)) || "";
+                  var isBotDetection = /bot is detected|recaptcha/i.test(String(errorText));
+
+                  if (isBotDetection && sendAttempt < 3) {
+                    var newToken = await getRecaptchaTokenWithRetry(3);
+                    if (newToken) {
+                      templateParams["g-recaptcha-response"] = newToken;
+                      if (recaptchaResponseHidden) recaptchaResponseHidden.value = newToken;
+                      sendAttempt += 1;
+                      await new Promise(function (resolve) { setTimeout(resolve, 300); });
+                    } else {
+                      throw sendError;
+                    }
+                  } else {
+                    throw sendError;
                   }
                 }
-
-                if (!looksLikeBotDetection || !templateParams["g-recaptcha-response"]) {
-                  throw firstError;
-                }
-
-                await sendViaEmailJs(templateParams);
               }
 
+              if (sendSucceeded) {
                 setNote("Message sent successfully. Thank you!");
                 launchConfetti();
                 form.reset();
                 if (recaptchaResponseHidden) recaptchaResponseHidden.value = "";
-              } catch (error) {
-                if (window.console && typeof window.console.error === "function") {
-                  window.console.error("EmailJS send failed:", error);
-                }
-                var detail = error && (error.text || error.message) ? " (" + (error.text || error.message) + ")" : "";
-                setNote("Something went wrong. Please try again." + detail);
-              } finally {
-                if (submitButton) {
-                  submitButton.disabled = false;
-                  submitButton.textContent = "Send Message";
-                }
               }
+            } catch (error) {
+              if (window.console && typeof window.console.error === "function") {
+                window.console.error("EmailJS send failed:", error);
+              }
+              var detail = error && (error.text || error.message) ? " (" + (error.text || error.message) + ")" : "";
+              setNote("Something went wrong. Please try again." + detail);
+            } finally {
+              if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = "Send Message";
+              }
+            }
           });
         })();
       </script>
