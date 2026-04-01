@@ -1658,6 +1658,59 @@ footer {
 }
 
 @media screen and (max-width: 767px) {
+  .home-page header .container {
+    position: relative;
+    min-height: clamp(240px, 58vw, 360px);
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .home-page header .hero-logo {
+    position: relative;
+    display: block;
+    width: min(92vw, 420px);
+    max-width: 100%;
+    height: auto;
+    margin: 16px auto 0;
+    transform: none !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-bottom: 0 !important;
+    z-index: 0;
+  }
+
+  .home-page header .hero-txt {
+    position: relative;
+    transform: none !important;
+    margin: 12px auto 0;
+    text-align: center !important;
+    font-size: clamp(1.05rem, 5vw, 1.45rem);
+    max-width: 22ch;
+  }
+
+  .home-page .about-section {
+    margin-top: 2.5rem;
+  }
+
+  .home-page .testimonials-section .el-temoignage-txt-wrapper {
+    width: 100%;
+    max-width: 34rem;
+    padding-left: 10px;
+    padding-right: 10px;
+    box-sizing: border-box;
+  }
+
+  .home-page .testimonials-section .swiper-slider-wrapper {
+    width: 100%;
+    max-width: 420px;
+    padding-right: 0;
+    box-sizing: border-box;
+  }
+
+  .home-page header .lrg-img-pointer {
+    display: none;
+  }
+
   .home-cta-section {
     padding: 22px 16px 40px;
   }
@@ -1668,6 +1721,24 @@ footer {
 
   .home-cta-copy {
     font-size: 1rem;
+  }
+}
+
+@media screen and (max-width: 399px) {
+  .home-page header .container {
+    min-height: 220px;
+  }
+
+  .home-page header .hero-logo {
+    width: min(90vw, 300px);
+  }
+
+  .home-page header .hero-txt {
+    font-size: 1rem;
+  }
+
+  .home-page .about-section {
+    margin-top: 2rem;
   }
 }
 
