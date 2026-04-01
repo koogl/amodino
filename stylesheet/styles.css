@@ -12,6 +12,12 @@ body {
   
 }
 
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
 .skip-link {
   position: absolute;
   left: 12px;
@@ -191,6 +197,12 @@ body {
 .home-page .nav-home-hero-asset {
   position: sticky;
   top: 0;
+}
+
+.nav_logo-wrapper img {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 .home-page .testimonials-section,
@@ -929,7 +941,9 @@ display: inline-block;
 	background: #358d12;
 	width: 40px;
 	height: 40px;
-	display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 	text-align: center;
 	margin-right: 5px;
 	border-radius: 50%;
@@ -939,6 +953,12 @@ display: inline-block;
 	-webkit-transition: .3s;
 	transition: .3s;
 	color: #fff;
+}
+
+.footer_profile ul li a .social-icon {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
 }
 .footer_copyright {
     margin-bottom: 20px;
@@ -1144,6 +1164,12 @@ footer {
   font-size: 20px;
   line-height: 1;
   color: #fff;
+}
+
+.nav-home-hero-asset .sm-wrapper .social-icon {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
 }
 
 .nav-home-hero-asset .sm-wrapper:link,
