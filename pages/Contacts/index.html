@@ -338,7 +338,8 @@
 
           var EMAILJS_PUBLIC_KEY = "VElLsJ8LDrxLvF_xN";
           var EMAILJS_SERVICE_ID = "service_kd71q71";
-          var EMAILJS_TEMPLATE_ID = "template_cfluv72";
+          var EMAILJS_TEMPLATE_ID_PRODUCTION = "template_cfluv72";
+          var EMAILJS_TEMPLATE_ID_LOCALHOST = "template_lpurowx";
           var RECAPTCHA_SITE_KEY = "6LfSRKEsAAAAADRnmbrCg6mCL3ucmu6gWXymL1mg";
 
           var note = document.getElementById("contact-form-note");
@@ -393,7 +394,8 @@
             return (
               EMAILJS_PUBLIC_KEY !== "YOUR_EMAILJS_PUBLIC_KEY" &&
               EMAILJS_SERVICE_ID !== "YOUR_EMAILJS_SERVICE_ID" &&
-              EMAILJS_TEMPLATE_ID !== "YOUR_EMAILJS_TEMPLATE_ID" &&
+              EMAILJS_TEMPLATE_ID_LOCALHOST !== "YOUR_EMAILJS_TEMPLATE_ID" &&
+              EMAILJS_TEMPLATE_ID_PRODUCTION !== "YOUR_EMAILJS_TEMPLATE_ID" &&
               RECAPTCHA_SITE_KEY !== "YOUR_RECAPTCHA_SITE_KEY"
             );
           }
@@ -481,7 +483,9 @@
           }
 
           async function sendViaEmailJs(templateParams) {
-            return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams, {
+            var templateId = isLocalhost ? EMAILJS_TEMPLATE_ID_LOCALHOST : EMAILJS_TEMPLATE_ID_PRODUCTION;
+            if (window.console) console.log("Using template:", templateId, isLocalhost ? "(localhost)" : "(production)");
+            return emailjs.send(EMAILJS_SERVICE_ID, templateId, templateParams, {
               publicKey: EMAILJS_PUBLIC_KEY
             });
           }
@@ -529,12 +533,10 @@
             var fullName = (firstName + " " + lastName).trim();
             
             setNote("Preparing to send...");
-            var recaptchaToken = await getRecaptchaTokenWithRetry(isLocalhost ? 1 : 3);
+            var recaptchaToken = isLocalhost ? "localhost-token" : await getRecaptchaTokenWithRetry(3);
 
-            if (!recaptchaToken) {
-              var msg = isLocalhost
-                ? "Error: Could not prepare form. Please refresh and try again."
-                : "⚠️ reCAPTCHA token generation failed. Please check your internet connection and try again.";
+            if (!recaptchaToken && !isLocalhost) {
+              var msg = "⚠️ reCAPTCHA token generation failed. Please check your internet connection and try again.";
               setNote(msg);
               if (submitButton) {
                 submitButton.disabled = false;
