@@ -53,12 +53,66 @@ cards.forEach((cardWrap) => {
   var menuTrigger = root.querySelector("#menu-toggle");
   var closeTrigger = root.querySelector("#menu-close");
   var overlay = root.querySelector("#full-menu");
+  var suppressedFocusEls = [];
+
+  function getFocusableOutsideMenu() {
+    var selector = [
+      "a[href]",
+      "area[href]",
+      "button:not([disabled])",
+      "input:not([disabled]):not([type='hidden'])",
+      "select:not([disabled])",
+      "textarea:not([disabled])",
+      "iframe",
+      "[tabindex]",
+      "[contenteditable='true']",
+      "audio[controls]",
+      "video[controls]",
+      "summary"
+    ].join(",");
+
+    return Array.from(document.querySelectorAll(selector)).filter(function (el) {
+      if (!el || !el.isConnected) return false;
+      if (root.contains(el)) return false;
+      if (el.tabIndex < 0) return false;
+      return true;
+    });
+  }
+
+  function suppressBackgroundFocus() {
+    Array.from(document.body.children).forEach(function (child) {
+      if (child !== root) child.inert = true;
+    });
+
+    suppressedFocusEls = getFocusableOutsideMenu();
+    suppressedFocusEls.forEach(function (el) {
+      el.setAttribute("data-menu-prev-tabindex", el.getAttribute("tabindex") || "");
+      el.setAttribute("tabindex", "-1");
+    });
+  }
+
+  function restoreBackgroundFocus() {
+    Array.from(document.body.children).forEach(function (child) {
+      if (child !== root) child.inert = false;
+    });
+
+    suppressedFocusEls.forEach(function (el) {
+      if (!el || !el.isConnected) return;
+      var previous = el.getAttribute("data-menu-prev-tabindex");
+      if (previous === "") el.removeAttribute("tabindex");
+      else el.setAttribute("tabindex", previous);
+      el.removeAttribute("data-menu-prev-tabindex");
+    });
+    suppressedFocusEls = [];
+  }
 
   function setMenuState(isOpen, moveFocus) {
     root.classList.toggle("is-menu-open", isOpen);
     if (overlay) overlay.setAttribute("aria-hidden", String(!isOpen));
     if (menuTrigger) menuTrigger.setAttribute("aria-expanded", String(isOpen));
     document.body.style.overflow = isOpen ? "hidden" : "";
+    if (isOpen) suppressBackgroundFocus();
+    else restoreBackgroundFocus();
     if (moveFocus) {
       if (isOpen && closeTrigger) closeTrigger.focus();
       else if (!isOpen && menuTrigger) menuTrigger.focus();
@@ -81,6 +135,14 @@ cards.forEach((cardWrap) => {
 
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape" && root.classList.contains("is-menu-open")) setMenuState(false, true);
+  });
+
+  document.addEventListener("focusin", function (e) {
+    if (!root.classList.contains("is-menu-open")) return;
+    var target = e.target;
+    if (target && !root.contains(target) && closeTrigger) {
+      closeTrigger.focus();
+    }
   });
 
   setMenuState(false);
@@ -170,3 +232,31 @@ document.addEventListener("DOMContentLoaded", function () {
     if (liveRegion) liveRegion.setAttribute("aria-live", "polite");
   });
 });
+
+// Rotate focus accent on each Tab press (static color per focus, no continuous animation)
+(function () {
+  var colors = [
+    { hex: "#FFE256", glow: "rgba(255, 226, 86, 0.55)" },
+    { hex: "#56E0FF", glow: "rgba(86, 224, 255, 0.55)" },
+    { hex: "#FF56FC", glow: "rgba(255, 86, 252, 0.55)" },
+    { hex: "#00AA00", glow: "rgba(0, 170, 0, 0.50)" }
+  ];
+  var lastIndex = 0;
+
+  function setFocusAccent(index) {
+    var root = document.documentElement;
+    root.style.setProperty("--focus-accent", colors[index].hex);
+    root.style.setProperty("--focus-accent-glow", colors[index].glow);
+  }
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Tab") return;
+
+    var nextIndex = lastIndex;
+    while (nextIndex === lastIndex) {
+      nextIndex = Math.floor(Math.random() * colors.length);
+    }
+    lastIndex = nextIndex;
+    setFocusAccent(nextIndex);
+  });
+})();
