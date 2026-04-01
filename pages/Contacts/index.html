@@ -517,8 +517,8 @@
             }
 
             var timeSinceLoad = Date.now() - pageLoadedAt;
-            if (!hasHumanSignal || timeSinceLoad < 1000) {
-              setNote("Please interact with the page, then submit again.");
+            if (timeSinceLoad < 800) {
+              setNote("Please wait a moment before submitting.");
               return;
             }
 
