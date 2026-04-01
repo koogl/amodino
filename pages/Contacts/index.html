@@ -258,6 +258,7 @@
               <input id="reply-to" type="hidden" name="reply_to" value="">
               <input type="hidden" name="to_email" value="perlin.amodino@gmail.com">
               <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response" value="">
+              <input type="hidden" id="honeypot" name="website_url" value="" style="display: none;">
               <div class="contact-form-actions">
                 <button type="submit" class="home-cta-btn home-cta-btn-secondary">Send Message</button>
               </div>
@@ -403,6 +404,7 @@
 
           var pageLoadedAt = Date.now();
           var hasHumanSignal = false;
+          var isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 
           function markHumanSignal() {
             hasHumanSignal = true;
@@ -412,20 +414,44 @@
           document.addEventListener("keydown", markHumanSignal, { passive: true });
           document.addEventListener("touchstart", markHumanSignal, { passive: true });
 
+          if (isLocalhost && window.console) {
+            console.warn("⚠️ LOCALHOST MODE: reCAPTCHA disabled for development. Using basic bot detection (honeypot + timing).");
+          }
+
           function getRecaptchaToken() {
             return new Promise(function (resolve) {
+              if (isLocalhost) {
+                resolve("localhost-bypass-token");
+                return;
+              }
+
               if (!window.grecaptcha || typeof window.grecaptcha.execute !== "function") {
+                if (window.console) console.warn("reCAPTCHA not loaded");
                 resolve("");
                 return;
               }
+
+              var tokenReceived = false;
+              var timeoutHandle = window.setTimeout(function () {
+                if (!tokenReceived) {
+                  if (window.console) console.warn("reCAPTCHA token request timeout");
+                  resolve("");
+                }
+              }, 5000);
 
               var run = function () {
                 window.grecaptcha
                   .execute(RECAPTCHA_SITE_KEY, { action: "contact_submit" })
                   .then(function (token) {
+                    tokenReceived = true;
+                    window.clearTimeout(timeoutHandle);
+                    if (window.console) console.log("reCAPTCHA token generated:", token ? "✓" : "empty");
                     resolve(token || "");
                   })
-                  .catch(function () {
+                  .catch(function (err) {
+                    tokenReceived = true;
+                    window.clearTimeout(timeoutHandle);
+                    if (window.console) console.error("reCAPTCHA token error:", err);
                     resolve("");
                   });
               };
@@ -441,12 +467,16 @@
           async function getRecaptchaTokenWithRetry(maxAttempts) {
             maxAttempts = maxAttempts || 3;
             for (var attempt = 0; attempt < maxAttempts; attempt++) {
+              if (attempt > 0) {
+                await new Promise(function (resolve) { setTimeout(resolve, 400 + attempt * 200); });
+              }
               var token = await getRecaptchaToken();
-              if (token) return token;
-              if (attempt < maxAttempts - 1) {
-                await new Promise(function (resolve) { setTimeout(resolve, 200 + attempt * 100); });
+              if (token) {
+                if (window.console) console.log("✓ Token result on attempt", attempt + 1);
+                return token;
               }
             }
+            if (window.console) console.warn("Failed to acquire token after", maxAttempts, "attempts");
             return "";
           }
 
@@ -475,28 +505,37 @@
               return;
             }
 
+            var honeypot = document.getElementById("honeypot");
+            if (honeypot && honeypot.value !== "") {
+              if (window.console) console.error("Honeypot field filled - likely a bot");
+              setNote("Something went wrong. Please try again.");
+              return;
+            }
+
+            var timeSinceLoad = Date.now() - pageLoadedAt;
+            if (!hasHumanSignal || timeSinceLoad < 1000) {
+              setNote("Please interact with the page, then submit again.");
+              return;
+            }
+
             if (submitButton) {
               submitButton.disabled = true;
               submitButton.textContent = "Sending...";
-            }
-
-            if (!hasHumanSignal || Date.now() - pageLoadedAt < 1000) {
-              setNote("Please interact with the page, then submit again.");
-              if (submitButton) {
-                submitButton.disabled = false;
-                submitButton.textContent = "Send Message";
-              }
-              return;
             }
 
             var firstName = form.querySelector("#first-name").value.trim();
             var lastName = form.querySelector("#last-name").value.trim();
             var senderEmail = form.querySelector("#email").value.trim();
             var fullName = (firstName + " " + lastName).trim();
-            var recaptchaToken = await getRecaptchaTokenWithRetry(3);
+            
+            setNote("Preparing to send...");
+            var recaptchaToken = await getRecaptchaTokenWithRetry(isLocalhost ? 1 : 3);
 
             if (!recaptchaToken) {
-              setNote("reCAPTCHA validation failed. Please refresh and try again.");
+              var msg = isLocalhost
+                ? "Error: Could not prepare form. Please refresh and try again."
+                : "⚠️ reCAPTCHA token generation failed. Please check your internet connection and try again.";
+              setNote(msg);
               if (submitButton) {
                 submitButton.disabled = false;
                 submitButton.textContent = "Send Message";
@@ -505,7 +544,6 @@
             }
 
             if (recaptchaResponseHidden) recaptchaResponseHidden.value = recaptchaToken;
-
             if (fromNameHidden) fromNameHidden.value = fullName;
             if (replyToHidden) replyToHidden.value = senderEmail;
 
@@ -524,41 +562,13 @@
             };
 
             try {
-              var sendAttempt = 0;
-              var sendSucceeded = false;
-              var lastSendError = null;
+              setNote("Sending message...");
+              await sendViaEmailJs(templateParams);
 
-              while (sendAttempt < 4 && !sendSucceeded) {
-                try {
-                  await sendViaEmailJs(templateParams);
-                  sendSucceeded = true;
-                } catch (sendError) {
-                  lastSendError = sendError;
-                  var errorText = (sendError && (sendError.text || sendError.message)) || "";
-                  var isBotDetection = /bot is detected|recaptcha/i.test(String(errorText));
-
-                  if (isBotDetection && sendAttempt < 3) {
-                    var newToken = await getRecaptchaTokenWithRetry(3);
-                    if (newToken) {
-                      templateParams["g-recaptcha-response"] = newToken;
-                      if (recaptchaResponseHidden) recaptchaResponseHidden.value = newToken;
-                      sendAttempt += 1;
-                      await new Promise(function (resolve) { setTimeout(resolve, 300); });
-                    } else {
-                      throw sendError;
-                    }
-                  } else {
-                    throw sendError;
-                  }
-                }
-              }
-
-              if (sendSucceeded) {
-                setNote("Message sent successfully. Thank you!");
-                launchConfetti();
-                form.reset();
-                if (recaptchaResponseHidden) recaptchaResponseHidden.value = "";
-              }
+              setNote("✓ Message sent successfully. Thank you!");
+              launchConfetti();
+              form.reset();
+              if (recaptchaResponseHidden) recaptchaResponseHidden.value = "";
             } catch (error) {
               if (window.console && typeof window.console.error === "function") {
                 window.console.error("EmailJS send failed:", error);
