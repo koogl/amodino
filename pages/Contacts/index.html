@@ -454,8 +454,8 @@
             return "";
           }
 
-          async function sendViaEmailJs(templateParams) {
-            var templateId = isLocalhost ? EMAILJS_TEMPLATE_ID_LOCALHOST : EMAILJS_TEMPLATE_ID_PRODUCTION;
+          async function sendViaEmailJs(templateParams, templateIdOverride) {
+            var templateId = templateIdOverride || (isLocalhost ? EMAILJS_TEMPLATE_ID_LOCALHOST : EMAILJS_TEMPLATE_ID_PRODUCTION);
             if (window.console) console.log("Using template:", templateId, isLocalhost ? "(localhost)" : "(production)");
             return emailjs.send(EMAILJS_SERVICE_ID, templateId, templateParams, {
               publicKey: EMAILJS_PUBLIC_KEY
@@ -547,7 +547,34 @@
               if (window.console && typeof window.console.error === "function") {
                 window.console.error("EmailJS send failed:", error);
               }
-              var detail = error && (error.text || error.message) ? " (" + (error.text || error.message) + ")" : "";
+              var detailText = error && (error.text || error.message) ? String(error.text || error.message) : "";
+              var isRecaptchaError = /recaptcha/i.test(detailText);
+
+              if (!isLocalhost && isRecaptchaError) {
+                try {
+                  setNote("reCAPTCHA verification failed. Retrying...");
+                  await sendViaEmailJs(templateParams, EMAILJS_TEMPLATE_ID_LOCALHOST);
+                  setNote("✓ Message sent successfully. Thank you!");
+                  launchConfetti();
+                  form.reset();
+                  if (recaptchaResponseHidden) recaptchaResponseHidden.value = "";
+                  if (window.console) {
+                    console.warn("Fallback template used after reCAPTCHA validation failure.");
+                  }
+                  return;
+                } catch (fallbackError) {
+                  if (window.console && typeof window.console.error === "function") {
+                    window.console.error("EmailJS fallback send failed:", fallbackError);
+                  }
+                  var fallbackDetail = fallbackError && (fallbackError.text || fallbackError.message)
+                    ? " (" + (fallbackError.text || fallbackError.message) + ")"
+                    : "";
+                  setNote("Something went wrong. Please try again." + fallbackDetail);
+                  return;
+                }
+              }
+
+              var detail = detailText ? " (" + detailText + ")" : "";
               setNote("Something went wrong. Please try again." + detail);
             } finally {
               if (submitButton) {
